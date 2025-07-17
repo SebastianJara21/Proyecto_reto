@@ -2,6 +2,7 @@ package EduData.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -26,8 +27,10 @@ public class Matricula {
     private Curso curso;
 
     @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Calificacion> calificaciones;
 
     @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Asistencia> asistencias;
 }

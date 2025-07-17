@@ -144,7 +144,42 @@ export default function EstudianteForm() {
                                     cargarEstudiantes();
                                 }}
                             >
-                                Probar Conexión
+                                Probar Conexión DB
+                            </button>
+                            <button 
+                                className="btn-success"
+                                onClick={async () => {
+                                    console.log("Probando health check...");
+                                    try {
+                                        const response = await api.get("/health");
+                                        console.log("Health check exitoso:", response.data);
+                                        alert("Backend funcionando correctamente: " + response.data.message);
+                                    } catch (error) {
+                                        console.error("Error en health check:", error);
+                                        alert("Error en health check - Ver consola");
+                                    }
+                                }}
+                            >
+                                Test Backend
+                            </button>
+                            <button 
+                                className="btn-primary"
+                                onClick={async () => {
+                                    console.log("Inicializando datos de prueba...");
+                                    try {
+                                        const response = await api.get("/health/init-data");
+                                        console.log("Datos inicializados:", response.data);
+                                        alert("Resultado: " + response.data.message);
+                                        if (response.data.status === "SUCCESS") {
+                                            cargarEstudiantes();
+                                        }
+                                    } catch (error) {
+                                        console.error("Error al inicializar datos:", error);
+                                        alert("Error al inicializar datos - Ver consola");
+                                    }
+                                }}
+                            >
+                                Crear Datos Prueba
                             </button>
                         </div>
                     </div>
@@ -291,9 +326,10 @@ export default function EstudianteForm() {
                         </div>
                         <div className="estadisticas">
                             <h4>Información de Depuración:</h4>
-                            <p><strong>Total de estudiantes:</strong> {estudiantes.length}</p>
+                            <p><strong>Total de estudiantes cargados:</strong> {estudiantes.length}</p>
                             <p><strong>Estudiantes filtrados:</strong> {estudiantesFiltrados.length}</p>
                             <p><strong>URL de la API:</strong> http://localhost:8081/api/estudiantes</p>
+                            <p><em>Abre la consola del navegador (F12) para ver más detalles</em></p>
                         </div>
                     </div>
 

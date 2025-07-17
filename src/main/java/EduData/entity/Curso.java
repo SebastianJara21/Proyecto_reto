@@ -2,6 +2,7 @@ package EduData.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -25,5 +26,6 @@ public class Curso {
     private Docente docente;
 
     @OneToMany(mappedBy = "curso")
+    @JsonIgnore
     private List<Matricula> matriculas;
 }
