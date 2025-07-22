@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../services/authService';
-import '../Layout/Dashboard.css';
+import '../layout/Dashboard.css';
 
 const Login = ({ onLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
@@ -164,31 +164,7 @@ const Login = ({ onLogin }) => {
                     </button>
                 </div>
 
-                {isLogin && (
-                    <div className="demo-users">
-                        <h3>👥 Usuarios de Prueba</h3>
-                        <div className="user-list">
-                            <div className="user-demo">
-                                <strong>👨‍💼 Administrador:</strong> admin / admin123
-                            </div>
-                            <div className="user-demo">
-                                <strong>👩‍🏫 Docente:</strong> docente / docente123
-                            </div>
-                            <div className="user-demo">
-                                <strong>👨‍🎓 Estudiante:</strong> estudiante / estudiante123
-                            </div>
-                            <div className="user-demo">
-                                <strong>👤 Invitado:</strong> invitado / guest123
-                            </div>
-                        </div>
-                        <p className="demo-note">
-                            💡 <em>Puedes usar cualquiera de estas credenciales o hacer click en "Entrar como Invitado"</em>
-                        </p>
-                        <p className="demo-note">
-                            🔧 <a href="/setup" style={{color: '#007bff'}}>¿Los usuarios no funcionan? Configurar Sistema</a>
-                        </p>
-                    </div>
-                )}
+                
             </div>
         </div>
     );

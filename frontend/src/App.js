@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import './Components/Layout/Dashboard.css';
+import './components_temp/layout/Dashboard.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import EstudianteForm from "./Components/estudiantes/EstudianteForm";
-import DocenteForm from "./Components/docentes/DocenteForm";
-import CursoForm from "./Components/cursos/CursoForm";
-import MatriculaForm from "./Components/matriculas/MatriculaForm";
-import AsistenciaForm from "./Components/asistencias/AsistenciaForm";
-import CalificacionForm from "./Components/calificaciones/CalificacionForm";
-import BusquedaInteligente from "./Components/busqueda/BusquedaInteligente";
-import Dashboard from "./Components/Layout/Dashboard";
-import Login from "./Components/auth/Login";
-import ProtectedRoute from "./Components/auth/ProtectedRoute";
-import AdminSetup from "./Components/admin/AdminSetup";
-import { authService } from "./Components/services/authService";
+import EstudianteForm from "./components_temp/estudiantes/EstudianteForm";
+import DocenteForm from "./components_temp/docentes/DocenteForm";
+import CursoForm from "./components_temp/cursos/CursoForm";
+import MatriculaForm from "./components_temp/matriculas/MatriculaForm";
+import AsistenciaForm from "./components_temp/asistencias/AsistenciaForm";
+import CalificacionForm from "./components_temp/calificaciones/CalificacionForm";
+import BusquedaInteligente from "./components_temp/busqueda/BusquedaInteligente";
+import Dashboard from "./components_temp/layout/Dashboard";
+import Login from "./components_temp/auth/Login";
+import ProtectedRoute from "./components_temp/auth/ProtectedRoute";
+import AdminSetup from "./components_temp/admin/AdminSetup";
+import { authService } from "./components_temp/services/authService";
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);

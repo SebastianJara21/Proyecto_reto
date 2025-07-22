@@ -33,7 +33,7 @@ export default function DocenteForm() {
             if (error.response?.status === 500) {
                 setError("Error 500: Problema en el servidor. El backend necesita ser reiniciado después de cambios en las entidades.");
             } else if (error.code === 'NETWORK_ERROR' || !error.response) {
-                setError("Error de conexión: Verifique que el backend esté ejecutándose en http://localhost:8081");
+                setError("Error de conexión: Verifique que el backend esté ejecutándose en la api url correcta.");
             } else {
                 setError(`Error: ${error.message}`);
             }

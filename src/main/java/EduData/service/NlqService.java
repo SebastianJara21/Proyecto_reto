@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class NlqService {
 
-    @Value("${spring.ai.openai.api-key}")
+    @Value("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")
     private String apiKey;
 
     private final EntityManager entityManager;
