@@ -41,3 +41,6 @@ src/main/resources/application.properties
 
 ### Mac OS ###
 .DS_Store
+
+### AWS Deployment ###
+aws-deployment/

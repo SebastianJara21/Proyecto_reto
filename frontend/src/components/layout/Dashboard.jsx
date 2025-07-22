@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 import { Link } from "react-router-dom";
 import busquedaService from "../services/busquedaService";
+import { authService } from "../services/authService";
 
 export default function Dashboard() {
     const [pregunta, setPregunta] = useState('');
@@ -9,12 +10,6 @@ export default function Dashboard() {
     const [jpqlGenerado, setJpqlGenerado] = useState('');
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState('');
-    const [estadisticas, setEstadisticas] = useState({
-        totalEstudiantes: 0,
-        totalCursos: 0,
-        totalDocentes: 0,
-        totalMatriculas: 0
-    });
 
     // Cargar estadísticas al montar el componente
     useEffect(() => {
@@ -23,8 +18,7 @@ export default function Dashboard() {
 
     const cargarEstadisticas = async () => {
         try {
-            const stats = await busquedaService.obtenerEstadisticas();
-            setEstadisticas(stats);
+            await busquedaService.obtenerEstadisticas();
         } catch (error) {
             console.error('Error cargando estadísticas:', error);
         }
@@ -70,6 +64,12 @@ export default function Dashboard() {
     const usarEjemplo = (ejemplo) => {
         setPregunta(ejemplo);
     };
+
+    const handleLogout = () => {
+        authService.logout();
+    };
+
+    const currentUser = authService.getCurrentUser();
 
     const renderResultados = () => {
         if (resultados.length === 0) return null;
@@ -124,16 +124,27 @@ export default function Dashboard() {
     return (
         <div className="dashboard">
             <header className="dashboard-header">
-                <h1>EduData</h1>
-                <p>Sistema Académico Inteligente</p>
+                <div className="header-title">
+                    <h1>EduData</h1>
+                    <p>Sistema Académico Inteligente</p>
+                </div>
+                <div className="header-user">
+                    {currentUser && (
+                        <span>Bienvenido, {currentUser.username} ({currentUser.role})</span>
+                    )}
+                    <button onClick={handleLogout} className="btn-logout">
+                        Cerrar Sesión
+                    </button>
+                </div>
                 <nav>
-                    <a href="#">Inicio</a>
+                    <Link to="/">Inicio</Link>
                     <Link to="/estudiantes">Estudiantes</Link>
                     <Link to="/docentes">Docentes</Link>
                     <Link to="/cursos">Cursos</Link>
                     <Link to="/matriculas">Matrículas</Link>
                     <Link to="/asistencias">Asistencia</Link>
                     <Link to="/calificaciones">Calificaciones</Link>
+                    <Link to="/busqueda">Búsqueda</Link>
                 </nav>
             </header>
 

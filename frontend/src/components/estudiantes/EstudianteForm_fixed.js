@@ -324,13 +324,6 @@ export default function EstudianteForm() {
                                 Limpiar Filtro
                             </button>
                         </div>
-                        <div className="estadisticas">
-                            <h4>Información de Depuración:</h4>
-                            <p><strong>Total de estudiantes cargados:</strong> {estudiantes.length}</p>
-                            <p><strong>Estudiantes filtrados:</strong> {estudiantesFiltrados.length}</p>
-                            <p><strong>URL de la API:</strong> http://localhost:8081/api/estudiantes</p>
-                            <p><em>Abre la consola del navegador (F12) para ver más detalles</em></p>
-                        </div>
                     </div>
 
                     <div className="table-container">

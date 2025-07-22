@@ -2,6 +2,7 @@ package EduData.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -20,5 +21,6 @@ public class Docente {
     private String especialidad;
 
     @OneToMany(mappedBy = "docente")
+    @JsonIgnore  // Esto evita la serialización de la colección cursos
     private List<Curso> cursos;
 }

@@ -273,12 +273,6 @@ export default function CursoForm() {
                                 Limpiar Filtro
                             </button>
                         </div>
-                        <div className="estadisticas">
-                            <h4>Información:</h4>
-                            <p><strong>Total de cursos:</strong> {cursos.length}</p>
-                            <p><strong>Cursos filtrados:</strong> {cursosFiltrados.length}</p>
-                            <p><strong>URL de la API:</strong> http://localhost:8081/api/cursos</p>
-                        </div>
                     </div>
 
                     <div className="table-container">

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import EduData.service.NlqService;
+import EduData.service.NlqServiceMejorado;
 
 import java.util.List;
 import java.util.Map;
@@ -14,9 +14,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/nlq")
 public class NlqControlador {
-    private final NlqService service;
+    private final NlqServiceMejorado service;
 
-    public NlqControlador(NlqService service){
+    public NlqControlador(NlqServiceMejorado service){
         this.service = service;
     }
 
@@ -32,8 +32,9 @@ public class NlqControlador {
     public Map<String, Object> test() {
         return Map.of(
                 "status", "OK",
-                "message", "El servicio NLQ está funcionando",
-                "timestamp", System.currentTimeMillis()
+                "message", "El servicio NLQ mejorado está funcionando",
+                "timestamp", System.currentTimeMillis(),
+                "version", "2.0"
         );
     }
 }

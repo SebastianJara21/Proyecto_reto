@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
+import { authService } from "../services/authService";
 
 export default function EstudianteForm() {
     const [estudiantes, setEstudiantes] = useState([]);
@@ -94,6 +95,7 @@ export default function EstudianteForm() {
         setMostrarFormulario(false);
     };
 
+    // Función para manejar cambios en los inputs del formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEstudiante(prev => ({
@@ -101,6 +103,55 @@ export default function EstudianteForm() {
             [name]: value
         }));
     };
+
+    // Funciones para descargar PDF
+    const descargarPDFTodos = async () => {
+        try {
+            const response = await api.get('/estudiantes/pdf', {
+                responseType: 'blob'
+            });
+            
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'estudiantes.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error al descargar PDF:', error);
+            alert('Error al descargar el PDF');
+        }
+    };
+
+    const descargarPDFIndividual = async (id) => {
+        try {
+            const response = await api.get(`/estudiantes/${id}/pdf`, {
+                responseType: 'blob'
+            });
+            
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `estudiante_${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error al descargar PDF:', error);
+            alert('Error al descargar el PDF');
+        }
+    };
+
+    const handleLogout = () => {
+        authService.logout();
+    };
+
+    const currentUser = authService.getCurrentUser();
 
     // Filtrar estudiantes
     const estudiantesFiltrados = estudiantes.filter(e => {
@@ -114,8 +165,18 @@ export default function EstudianteForm() {
     return (
         <div className="dashboard">
             <header className="dashboard-header">
-                <h1>Gestión de Estudiantes</h1>
-                <p>Administra los estudiantes del sistema educativo</p>
+                <div className="header-title">
+                    <h1>Gestión de Estudiantes</h1>
+                    <p>Administra los estudiantes del sistema educativo</p>
+                </div>
+                <div className="header-user">
+                    {currentUser && (
+                        <span>Bienvenido, {currentUser.username} ({currentUser.role})</span>
+                    )}
+                    <button onClick={handleLogout} className="btn-logout">
+                        Cerrar Sesión
+                    </button>
+                </div>
                 <nav>
                     <Link to="/">Inicio</Link>
                     <Link to="/estudiantes" className="active">Estudiantes</Link>
@@ -123,6 +184,7 @@ export default function EstudianteForm() {
                     <Link to="/matriculas">Matrículas</Link>
                     <Link to="/asistencias">Asistencias</Link>
                     <Link to="/calificaciones">Calificaciones</Link>
+                    <Link to="/busqueda">Búsqueda</Link>
                 </nav>
             </header>
 
@@ -138,13 +200,11 @@ export default function EstudianteForm() {
                                 {mostrarFormulario ? "Cancelar" : "Nuevo Estudiante"}
                             </button>
                             <button 
-                                className="btn-secondary"
-                                onClick={() => {
-                                    console.log("Probando conectividad...");
-                                    cargarEstudiantes();
-                                }}
+                                className="btn-pdf"
+                                onClick={descargarPDFTodos}
+                                title="Descargar PDF de todos los estudiantes"
                             >
-                                Probar Conexión
+                                📄 PDF Todos
                             </button>
                         </div>
                     </div>
@@ -286,14 +346,8 @@ export default function EstudianteForm() {
                                 className="btn-secondary"
                                 onClick={() => setFiltroNombre("")}
                             >
-                                Limpiar Filtro
+                                Limpiar
                             </button>
-                        </div>
-                        <div className="estadisticas">
-                            <h4>Información de Depuración:</h4>
-                            <p><strong>Total de estudiantes:</strong> {estudiantes.length}</p>
-                            <p><strong>Estudiantes filtrados:</strong> {estudiantesFiltrados.length}</p>
-                            <p><strong>URL de la API:</strong> http://localhost:8081/api/estudiantes</p>
                         </div>
                     </div>
 
@@ -333,6 +387,13 @@ export default function EstudianteForm() {
                                                 className="btn-delete"
                                             >
                                                 Eliminar
+                                            </button>
+                                            <button 
+                                                onClick={() => descargarPDFIndividual(e.id)}
+                                                className="btn-pdf"
+                                                title="Descargar PDF del estudiante"
+                                            >
+                                                📄
                                             </button>
                                         </td>
                                     </tr>

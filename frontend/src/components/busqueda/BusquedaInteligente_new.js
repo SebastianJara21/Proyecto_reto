@@ -34,15 +34,12 @@ const BusquedaInteligente = () => {
         "¿Cuántos estudiantes hay en total?",
         "Estudiantes del año 2024",
         "Estudiantes de género masculino",
-        "Estudiantes de género femenino", 
+        "Estudiantes de género femenino",
         "Cursos de matemáticas",
         "¿Cuántos docentes hay?",
         "Docentes especializados en informática",
         "Estudiantes matriculados en 2024",
-        "Matriculas del año 2024",
-        "Datos de Sebastian Figueroa",
-        "Cursos que tiene Sebastian",
-        "Estudiantes en cursos de matemáticas"
+        "¿Cuántos cursos hay del año 2023?"
     ];
 
     const realizarBusqueda = async () => {

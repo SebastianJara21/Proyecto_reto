@@ -853,3 +853,209 @@ body {
         padding: 6px 4px;
     }
 }
+
+/* Estilos para autenticación */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #34495e;
+    font-size: 28px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-options {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+}
+
+.guest-btn {
+    width: 100%;
+    padding: 10px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.guest-btn:hover:not(:disabled) {
+    background: #7f8c8d;
+}
+
+.access-denied {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    margin: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.access-denied h3 {
+    color: #e74c3c;
+    margin-bottom: 15px;
+}
+
+/* Header con información de usuario */
+.header-title {
+    flex: 1;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #cce0ff;
+}
+
+.btn-logout {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Botones PDF */
+.btn-pdf {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-left: 5px;
+}
+
+.btn-pdf:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 18px;
+    color: #34495e;
+}
+
+/* Estilos para usuarios de prueba en Login */
+.demo-users {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.demo-users h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.user-list {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.user-demo {
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #495057;
+    border: 1px solid #e9ecef;
+}
+
+.user-demo strong {
+    color: #343a40;
+    font-weight: 600;
+}
+
+.demo-note {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+    margin: 0;
+    font-style: italic;
+    line-height: 1.4;
+}

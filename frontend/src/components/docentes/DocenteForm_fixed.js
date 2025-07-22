@@ -13,8 +13,6 @@ export default function DocenteForm() {
     const [editando, setEditando] = useState(false);
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [filtroNombre, setFiltroNombre] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
 
     useEffect(() => {
         cargarDocentes();
@@ -22,23 +20,10 @@ export default function DocenteForm() {
 
     const cargarDocentes = async () => {
         try {
-            setLoading(true);
-            setError("");
-            console.log("Cargando docentes...");
             const response = await api.get("/docentes");
-            console.log("Docentes cargados:", response.data);
             setDocentes(response.data);
         } catch (error) {
             console.error("Error al cargar docentes:", error);
-            if (error.response?.status === 500) {
-                setError("Error 500: Problema en el servidor. El backend necesita ser reiniciado después de cambios en las entidades.");
-            } else if (error.code === 'NETWORK_ERROR' || !error.response) {
-                setError("Error de conexión: Verifique que el backend esté ejecutándose en http://localhost:8081");
-            } else {
-                setError(`Error: ${error.message}`);
-            }
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -101,7 +86,7 @@ export default function DocenteForm() {
     const docentesFiltrados = docentes.filter(d => {
         const cumpleNombre = !filtroNombre || 
             d.nombre.toLowerCase().includes(filtroNombre.toLowerCase()) ||
-            (d.identificacion && d.identificacion.includes(filtroNombre)) ||
+            d.identificacion.includes(filtroNombre) ||
             d.email.toLowerCase().includes(filtroNombre.toLowerCase());
         return cumpleNombre;
     });
@@ -122,83 +107,15 @@ export default function DocenteForm() {
             </header>
 
             <main className="dashboard-main">
-                {error && (
-                    <div style={{
-                        backgroundColor: '#e74c3c',
-                        color: 'white',
-                        padding: '15px',
-                        margin: '20px',
-                        borderRadius: '5px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        <p style={{margin: 0}}>⚠️ {error}</p>
-                        <button 
-                            onClick={() => setError("")}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: 'white',
-                                fontSize: '20px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            ×
-                        </button>
-                    </div>
-                )}
-                
-                {loading && (
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        padding: '40px',
-                        textAlign: 'center'
-                    }}>
-                        <div style={{
-                            width: '40px',
-                            height: '40px',
-                            border: '4px solid #ecf0f1',
-                            borderTop: '4px solid #3498db',
-                            borderRadius: '50%',
-                            animation: 'spin 1s linear infinite',
-                            marginBottom: '20px'
-                        }}></div>
-                        <p>Cargando docentes...</p>
-                    </div>
-                )}
-
                 <div className="form-section">
                     <div className="form-header">
-                        <h2>Docentes Registrados ({docentes.length})</h2>
+                        <h2>Docentes Registrados</h2>
                         <div style={{display: 'flex', gap: '10px'}}>
                             <button 
                                 className="btn-primary"
                                 onClick={() => setMostrarFormulario(!mostrarFormulario)}
                             >
                                 {mostrarFormulario ? "Cancelar" : "Nuevo Docente"}
-                            </button>
-                            <button 
-                                className="btn-secondary"
-                                onClick={cargarDocentes}
-                                disabled={loading}
-                            >
-                                🔄 Recargar
-                            </button>
-                            <button 
-                                className="btn-secondary"
-                                onClick={async () => {
-                                    try {
-                                        const response = await api.get("/health");
-                                        alert(`Backend funcionando: ${response.data.status}`);
-                                    } catch (err) {
-                                        alert(`Error de conexión: ${err.message}`);
-                                    }
-                                }}
-                            >
-                                🩺 Test
                             </button>
                         </div>
                     </div>
@@ -286,61 +203,53 @@ export default function DocenteForm() {
                                 Limpiar Filtro
                             </button>
                         </div>
+                        <div className="estadisticas">
+                            <h4>Información de Depuración:</h4>
+                            <p><strong>Total de docentes cargados:</strong> {docentes.length}</p>
+                            <p><strong>Docentes filtrados:</strong> {docentesFiltrados.length}</p>
+                            <p><strong>URL de la API:</strong> http://localhost:8081/api/docentes</p>
+                            <p><em>Abre la consola del navegador (F12) para ver más detalles</em></p>
+                        </div>
                     </div>
 
                     <div className="table-container">
-                        {docentes.length === 0 && !loading ? (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '40px',
-                                color: '#7f8c8d'
-                            }}>
-                                <p style={{fontSize: '16px', margin: '0 0 10px 0'}}>
-                                    No hay docentes registrados
-                                </p>
-                                <p style={{fontSize: '14px', margin: 0}}>
-                                    {error ? 'Verifique que el backend esté funcionando correctamente' : '¡Agrega el primero!'}
-                                </p>
-                            </div>
-                        ) : (
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Identificación</th>
-                                        <th>Nombre</th>
-                                        <th>Email</th>
-                                        <th>Especialidad</th>
-                                        <th>Acciones</th>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Identificación</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Especialidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {docentesFiltrados.map(d => (
+                                    <tr key={d.id}>
+                                        <td>{d.id}</td>
+                                        <td>{d.identificacion}</td>
+                                        <td>{d.nombre}</td>
+                                        <td>{d.email}</td>
+                                        <td>{d.especialidad}</td>
+                                        <td>
+                                            <button 
+                                                onClick={() => editarDocente(d)}
+                                                className="btn-edit"
+                                            >
+                                                Editar
+                                            </button>
+                                            <button 
+                                                onClick={() => eliminarDocente(d.id)}
+                                                className="btn-delete"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {docentesFiltrados.map(d => (
-                                        <tr key={d.id}>
-                                            <td>{d.id}</td>
-                                            <td>{d.identificacion || 'N/A'}</td>
-                                            <td>{d.nombre}</td>
-                                            <td>{d.email}</td>
-                                            <td>{d.especialidad}</td>
-                                            <td>
-                                                <button 
-                                                    onClick={() => editarDocente(d)}
-                                                    className="btn-edit"
-                                                >
-                                                    Editar
-                                                </button>
-                                                <button 
-                                                    onClick={() => eliminarDocente(d.id)}
-                                                    className="btn-delete"
-                                                >
-                                                    Eliminar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>

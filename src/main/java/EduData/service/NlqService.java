@@ -68,17 +68,23 @@ public class NlqService {
 
             Entidad 'Docente':
             - id (Long)
-            - identificacion (String)
             - nombre (String)
-            - apellido (String)
-            - correo (String)
+            - email (String)
             - especialidad (String)
+
+            REGLAS IMPORTANTES:
+            1. Usa valores literales en lugar de parámetros nombrados
+            2. Para strings, usa comillas simples: 'valor'
+            3. Para números, usa valores directos: 2024
+            4. Para LIKE, usa el formato: LIKE '%texto%'
 
             Ejemplos de consultas:
             - "cuántos estudiantes hay" -> SELECT COUNT(e) FROM Estudiante e
             - "estudiantes del 2024" -> SELECT e FROM Estudiante e WHERE e.matriculaAnio = 2024
-            - "estudiantes de masculino" -> SELECT e FROM Estudiante e WHERE e.genero = 'Masculino'
+            - "estudiantes de género masculino" -> SELECT e FROM Estudiante e WHERE e.genero = 'Masculino'
             - "cursos de matemáticas" -> SELECT c FROM Curso c WHERE c.nombre LIKE '%matemática%'
+            - "estudiante llamado Juan" -> SELECT e FROM Estudiante e WHERE e.nombre LIKE '%Juan%'
+            - "docentes de informática" -> SELECT d FROM Docente d WHERE d.especialidad LIKE '%informática%'
 
             Devuelve solo la consulta JPQL válida, sin explicación ni formato adicional.
 
@@ -154,6 +160,17 @@ public class NlqService {
             // Ejecutar JPQL
             try {
                 System.out.println("=== EJECUTANDO JPQL ===");
+                
+                // Verificar si la consulta tiene parámetros nombrados sin resolver
+                if (jpql.contains(":") && jpql.matches(".*:[a-zA-Z][a-zA-Z0-9]*.*")) {
+                    System.err.println("ERROR: La consulta contiene parámetros nombrados sin resolver");
+                    return List.of(Map.of(
+                            "error", "La consulta generada contiene parámetros no resueltos. Intenta reformular tu pregunta con más contexto.",
+                            "jpql", jpql,
+                            "sugerencia", "Ejemplo: En lugar de preguntar '¿cómo se llama el estudiante?' pregunta '¿cuántos estudiantes hay?' o 'estudiantes del año 2024'"
+                    ));
+                }
+                
                 Query query = entityManager.createQuery(jpql);
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> resultados = (List<Map<String, Object>>) query.getResultList();
@@ -167,7 +184,8 @@ public class NlqService {
                 // Devuelve el error y el JPQL generado para depuración
                 return List.of(Map.of(
                         "error", "Error ejecutando consulta: " + e.getMessage(),
-                        "jpql", jpql
+                        "jpql", jpql,
+                        "sugerencia", "Intenta hacer una pregunta más específica como '¿cuántos estudiantes hay?' o 'estudiantes del año 2024'"
                 ));
             }
 

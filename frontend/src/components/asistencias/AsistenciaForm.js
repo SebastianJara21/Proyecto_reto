@@ -5,7 +5,6 @@ import api from "../services/api";
 export default function AsistenciaForm() {
     const [asistencias, setAsistencias] = useState([]);
     const [matriculas, setMatriculas] = useState([]);
-    const [estudiantes, setEstudiantes] = useState([]);
     const [asistencia, setAsistencia] = useState({
         fecha: new Date().toISOString().split('T')[0],
         presente: true,
@@ -19,7 +18,6 @@ export default function AsistenciaForm() {
     useEffect(() => {
         cargarAsistencias();
         cargarMatriculas();
-        cargarEstudiantes();
     }, []);
 
     const cargarAsistencias = async () => {
@@ -37,15 +35,6 @@ export default function AsistenciaForm() {
             setMatriculas(response.data);
         } catch (error) {
             console.error("Error al cargar matrículas:", error);
-        }
-    };
-
-    const cargarEstudiantes = async () => {
-        try {
-            const response = await api.get("/estudiantes");
-            setEstudiantes(response.data);
-        } catch (error) {
-            console.error("Error al cargar estudiantes:", error);
         }
     };
 
