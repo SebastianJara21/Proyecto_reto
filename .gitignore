@@ -34,11 +34,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Application Properties ###
-**/application.properties
-application.properties
-src/main/resources/application.properties
-
 ### Mac OS ###
 .DS_Store
 
