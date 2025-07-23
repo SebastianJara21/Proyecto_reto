@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @Service
 public class NlqServiceMejorado {
 
-    @Value("${spring.ai.openai.api-key:}")
+    @Value("${spring.ai.openai.api-key}")
     private String apiKey;
 
     @Value("${server.url:https://edudata-backend.onrender.com}")
@@ -92,15 +92,25 @@ public class NlqServiceMejorado {
             System.out.println("API Key verificación - Existe: " + (apiKey != null));
             System.out.println("API Key verificación - No vacía: " + (apiKey != null && !apiKey.trim().isEmpty()));
             
+            // Debug más detallado de la API key
+            if (apiKey != null) {
+                System.out.println("API Key longitud: " + apiKey.length());
+                System.out.println("API Key primeros 10 caracteres: " + (apiKey.length() > 10 ? apiKey.substring(0, 10) + "..." : apiKey));
+            }
+            
             if (apiKey == null || apiKey.trim().isEmpty()) {
                 System.err.println("ERROR: API Key no configurada");
                 System.err.println("Valor actual de apiKey: '" + apiKey + "'");
                 return List.of(Map.of("error", "API Key de OpenRouter no configurada. Verifica application.properties"));
             }
 
+            // Limpiar la API key de posibles espacios o caracteres extraños
+            String cleanApiKey = apiKey.trim();
+            System.out.println("API Key limpia longitud: " + cleanApiKey.length());
+
             WebClient client = WebClient.builder()
                     .baseUrl("https://openrouter.ai")
-                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + cleanApiKey)
                     .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .defaultHeader("HTTP-Referer", serverUrl) // Referer dinámico según entorno
                     .defaultHeader("X-Title", "EduData") // Opcional pero recomendado
@@ -117,13 +127,28 @@ public class NlqServiceMejorado {
                     "\"temperature\": 0.1" +
                     "}";
 
+            System.out.println("=== DEBUG REQUEST ===");
+            System.out.println("Authorization header: Bearer " + (cleanApiKey.length() > 10 ? cleanApiKey.substring(0, 10) + "..." : cleanApiKey));
+            System.out.println("Request URL: https://openrouter.ai/api/v1/chat/completions");
+            System.out.println("HTTP-Referer: " + serverUrl);
+
             String responseJson = client.post()
                     .uri("/api/v1/chat/completions")
                     .bodyValue(requestBody)
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                            response -> response.bodyToMono(String.class)
-                                    .flatMap(errorBody -> Mono.error(new RuntimeException("Error al llamar a OpenRouter: " + errorBody))))
+                            response -> {
+                                System.err.println("=== ERROR RESPONSE STATUS ===");
+                                System.err.println("Status: " + response.statusCode());
+                                System.err.println("Headers: " + response.headers().asHttpHeaders());
+                                
+                                return response.bodyToMono(String.class)
+                                        .doOnNext(errorBody -> {
+                                            System.err.println("=== ERROR RESPONSE BODY ===");
+                                            System.err.println(errorBody);
+                                        })
+                                        .flatMap(errorBody -> Mono.error(new RuntimeException("Error al llamar a OpenRouter: " + errorBody)));
+                            })
                     .bodyToMono(String.class)
                     .block();
 
