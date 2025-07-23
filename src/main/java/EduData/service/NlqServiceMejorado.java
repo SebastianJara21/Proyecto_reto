@@ -17,8 +17,11 @@ import java.util.regex.Pattern;
 @Service
 public class NlqServiceMejorado {
 
-    @Value("${spring.ai.openai.api-key}")
+    @Value("${spring.ai.openai.api-key:}")
     private String apiKey;
+
+    @Value("${server.url:https://edudata-backend.onrender.com}")
+    private String serverUrl;
 
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
@@ -85,16 +88,22 @@ public class NlqServiceMejorado {
 
         try {
             System.out.println("=== LLAMANDO A OPENROUTER ===");
+            System.out.println("Server URL configurada: " + serverUrl);
+            System.out.println("API Key verificación - Existe: " + (apiKey != null));
+            System.out.println("API Key verificación - No vacía: " + (apiKey != null && !apiKey.trim().isEmpty()));
             
             if (apiKey == null || apiKey.trim().isEmpty()) {
                 System.err.println("ERROR: API Key no configurada");
-                return List.of(Map.of("error", "API Key de OpenRouter no configurada"));
+                System.err.println("Valor actual de apiKey: '" + apiKey + "'");
+                return List.of(Map.of("error", "API Key de OpenRouter no configurada. Verifica application.properties"));
             }
 
             WebClient client = WebClient.builder()
                     .baseUrl("https://openrouter.ai")
                     .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
                     .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .defaultHeader("HTTP-Referer", serverUrl) // Referer dinámico según entorno
+                    .defaultHeader("X-Title", "EduData") // Opcional pero recomendado
                     .build();
 
             String escapedPrompt = prompt.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "");

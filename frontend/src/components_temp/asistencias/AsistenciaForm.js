@@ -258,6 +258,8 @@ export default function AsistenciaForm() {
                                     onChange={(e) => setFiltroMatricula(e.target.value)}
                                 />
                             </div>
+                        </div>
+                        <div className="form-actions" style={{ marginTop: '15px' }}>
                             <button 
                                 className="btn-secondary"
                                 onClick={() => {

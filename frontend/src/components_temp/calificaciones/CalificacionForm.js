@@ -263,8 +263,8 @@ export default function CalificacionForm() {
                     {/* Filtros */}
                     <div className="filtros-container">
                         <h3>Filtros y Estadísticas</h3>
-                        <div className="filtros-grupo">
-                            <div className="form-group">
+                        <div className="filtros-grupo" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                            <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
                                 <label htmlFor="filtroTipo">Filtrar por tipo:</label>
                                 <select
                                     id="filtroTipo"
@@ -279,7 +279,7 @@ export default function CalificacionForm() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="form-group">
+                            <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
                                 <label htmlFor="filtroMatricula">Buscar estudiante/curso:</label>
                                 <input
                                     type="text"
@@ -289,6 +289,8 @@ export default function CalificacionForm() {
                                     onChange={(e) => setFiltroMatricula(e.target.value)}
                                 />
                             </div>
+                        </div>
+                        <div className="form-actions" style={{ marginTop: '15px' }}>
                             <button 
                                 className="btn-secondary"
                                 onClick={() => {
