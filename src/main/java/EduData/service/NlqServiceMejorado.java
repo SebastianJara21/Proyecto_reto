@@ -22,6 +22,10 @@ public class NlqServiceMejorado {
 
     @Value("${server.url:https://edudata-backend.onrender.com}")
     private String serverUrl;
+    
+    // Backup: intentar leer directamente del environment
+    @org.springframework.beans.factory.annotation.Value("#{systemEnvironment['OPENAI_API_KEY'] ?: '${spring.ai.openai.api-key:}'}")
+    private String backupApiKey;
 
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
@@ -29,6 +33,26 @@ public class NlqServiceMejorado {
     public NlqServiceMejorado(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.objectMapper = new ObjectMapper();
+        
+        // Debug: Verificar que la API key se esté inyectando correctamente
+        System.out.println("=== INICIALIZANDO NlqServiceMejorado ===");
+    }
+    
+    // Método para debug - será llamado después de la inicialización
+    @jakarta.annotation.PostConstruct
+    private void debugApiKey() {
+        System.out.println("=== POST-CONSTRUCT DEBUG ===");
+        System.out.println("API Key después de inicialización - Existe: " + (apiKey != null));
+        System.out.println("API Key después de inicialización - No vacía: " + (apiKey != null && !apiKey.trim().isEmpty()));
+        System.out.println("Backup API Key - Existe: " + (backupApiKey != null));
+        System.out.println("Backup API Key - No vacía: " + (backupApiKey != null && !backupApiKey.trim().isEmpty()));
+        
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
+            System.out.println("API Key (primeros 15 chars): " + apiKey.substring(0, Math.min(15, apiKey.length())) + "...");
+        }
+        if (backupApiKey != null && !backupApiKey.trim().isEmpty()) {
+            System.out.println("Backup API Key (primeros 15 chars): " + backupApiKey.substring(0, Math.min(15, backupApiKey.length())) + "...");
+        }
     }
 
     public List<Map<String, Object>> answer(String pregunta) {
@@ -89,41 +113,56 @@ public class NlqServiceMejorado {
         try {
             System.out.println("=== LLAMANDO A OPENROUTER ===");
             System.out.println("Server URL configurada: " + serverUrl);
-            System.out.println("API Key verificación - Existe: " + (apiKey != null));
-            System.out.println("API Key verificación - No vacía: " + (apiKey != null && !apiKey.trim().isEmpty()));
             
-            if (apiKey == null || apiKey.trim().isEmpty()) {
+            // Usar backup API key si la principal está vacía
+            String effectiveApiKey = (apiKey != null && !apiKey.trim().isEmpty()) ? apiKey : backupApiKey;
+            
+            System.out.println("API Key verificación - Existe: " + (effectiveApiKey != null));
+            System.out.println("API Key verificación - No vacía: " + (effectiveApiKey != null && !effectiveApiKey.trim().isEmpty()));
+            
+            if (effectiveApiKey == null || effectiveApiKey.trim().isEmpty()) {
                 System.err.println("ERROR: API Key no configurada");
-                System.err.println("Valor actual de apiKey: '" + apiKey + "'");
                 return List.of(Map.of("error", "API Key de OpenRouter no configurada. Verifica application.properties"));
             }
 
+            // Crear el cuerpo de la petición usando Map para evitar problemas de escape
+            Map<String, Object> messageMap = new HashMap<>();
+            messageMap.put("role", "user");
+            messageMap.put("content", prompt);
+            
+            Map<String, Object> requestBodyMap = new HashMap<>();
+            requestBodyMap.put("model", "deepseek/deepseek-r1-0528:free");
+            requestBodyMap.put("messages", List.of(messageMap));
+            requestBodyMap.put("max_tokens", 1000);
+            requestBodyMap.put("temperature", 0.1);
+            
+            String requestBodyJson = objectMapper.writeValueAsString(requestBodyMap);
+            
+            System.out.println("=== ENVIANDO PETICIÓN A OPENROUTER ===");
+            System.out.println("Usando modelo: deepseek/deepseek-r1-0528:free");
+
             WebClient client = WebClient.builder()
                     .baseUrl("https://openrouter.ai")
-                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .defaultHeader("HTTP-Referer", serverUrl) // Referer dinámico según entorno
-                    .defaultHeader("X-Title", "EduData") // Opcional pero recomendado
+                    .defaultHeader("Authorization", "Bearer " + effectiveApiKey)
+                    .defaultHeader("Content-Type", "application/json")
+                    .defaultHeader("HTTP-Referer", serverUrl)
+                    .defaultHeader("X-Title", "EduData")
                     .build();
-
-            String escapedPrompt = prompt.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "");
-            
-            String requestBody = "{" +
-                    "\"model\": \"openai/gpt-4o\"," +
-                    "\"messages\": [" +
-                    "{\"role\": \"user\", \"content\": \"" + escapedPrompt + "\"}" +
-                    "]," +
-                    "\"max_tokens\": 1000," +
-                    "\"temperature\": 0.1" +
-                    "}";
 
             String responseJson = client.post()
                     .uri("/api/v1/chat/completions")
-                    .bodyValue(requestBody)
+                    .bodyValue(requestBodyJson)
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                            response -> response.bodyToMono(String.class)
-                                    .flatMap(errorBody -> Mono.error(new RuntimeException("Error al llamar a OpenRouter: " + errorBody))))
+                            response -> {
+                                System.err.println("=== ERROR HTTP DETECTADO ===");
+                                System.err.println("Status: " + response.statusCode());
+                                return response.bodyToMono(String.class)
+                                        .doOnNext(errorBody -> {
+                                            System.err.println("Error body: " + errorBody);
+                                        })
+                                        .flatMap(errorBody -> Mono.error(new RuntimeException("Error al llamar a OpenRouter: " + errorBody)));
+                            })
                     .bodyToMono(String.class)
                     .block();
 
@@ -157,13 +196,24 @@ public class NlqServiceMejorado {
             return ejecutarConsulta(jpql);
 
         } catch (Exception e) {
-            System.err.println("=== ERROR GENERAL ===");
+            System.err.println("=== ERROR AL LLAMAR A OPENROUTER ===");
             System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            
+            // Usar sistema de respaldo
+            String jpqlFallback = generarJpqlFallback(pregunta, parametros);
+            
+            if (jpqlFallback != null && !jpqlFallback.trim().isEmpty()) {
+                System.out.println("� Usando consulta de respaldo: " + jpqlFallback);
+                try {
+                    return ejecutarConsulta(jpqlFallback);
+                } catch (Exception ex) {
+                    System.err.println("❌ Error ejecutando consulta de respaldo: " + ex.getMessage());
+                }
+            }
             
             return List.of(Map.of(
-                    "error", "Error en el servicio: " + e.getMessage(),
-                    "sugerencia", "Intenta con preguntas más simples como '¿cuántos estudiantes hay?' o 'estudiantes del 2024'"
+                "error", "Error en el servicio: " + e.getMessage(),
+                "sugerencia", "Intenta con preguntas más simples como '¿cuántos estudiantes hay?' o 'estudiantes del 2024'"
             ));
         }
     }
@@ -326,5 +376,67 @@ public class NlqServiceMejorado {
         }
         
         return parametros;
+    }
+    
+    /**
+     * Generador de consultas JPQL de respaldo (sin IA)
+     * Usado cuando OpenRouter no está disponible
+     */
+    private String generarJpqlFallback(String pregunta, Map<String, String> parametros) {
+        String preguntaLower = pregunta.toLowerCase();
+        
+        // Consultas básicas más comunes
+        if (preguntaLower.contains("cuántos estudiantes") || preguntaLower.contains("total estudiantes")) {
+            return "SELECT COUNT(e) FROM Estudiante e";
+        }
+        
+        if (preguntaLower.contains("todos los estudiantes") || preguntaLower.contains("listar estudiantes")) {
+            return "SELECT e FROM Estudiante e";
+        }
+        
+        if (preguntaLower.contains("estudiantes masculinos")) {
+            return "SELECT e FROM Estudiante e WHERE e.genero = 'Masculino'";
+        }
+        
+        if (preguntaLower.contains("estudiantes femeninos") || preguntaLower.contains("estudiantes mujeres")) {
+            return "SELECT e FROM Estudiante e WHERE e.genero = 'Femenino'";
+        }
+        
+        if (preguntaLower.contains("todos los cursos") || preguntaLower.contains("listar cursos")) {
+            return "SELECT c FROM Curso c";
+        }
+        
+        if (preguntaLower.contains("todos los docentes") || preguntaLower.contains("listar docentes")) {
+            return "SELECT d FROM Docente d";
+        }
+        
+        if (preguntaLower.contains("matriculas")) {
+            if (parametros.containsKey("anio")) {
+                return "SELECT m FROM Matricula m WHERE m.anio = " + parametros.get("anio");
+            }
+            return "SELECT m FROM Matricula m";
+        }
+        
+        // Búsquedas por nombre específico
+        if (parametros.containsKey("nombre")) {
+            String nombre = parametros.get("nombre");
+            if (preguntaLower.contains("estudiante")) {
+                return "SELECT e FROM Estudiante e WHERE e.nombre LIKE '%" + nombre + "%'";
+            }
+            if (preguntaLower.contains("docente")) {
+                return "SELECT d FROM Docente d WHERE d.nombre LIKE '%" + nombre + "%'";
+            }
+        }
+        
+        // Búsquedas por año
+        if (parametros.containsKey("anio")) {
+            String anio = parametros.get("anio");
+            if (preguntaLower.contains("estudiante")) {
+                return "SELECT e FROM Estudiante e WHERE e.matriculaAnio = " + anio;
+            }
+        }
+        
+        // Si no puede generar una consulta específica, retornar consulta básica
+        return "SELECT e FROM Estudiante e";
     }
 }
